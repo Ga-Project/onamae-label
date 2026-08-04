@@ -1,0 +1,672 @@
+/* おなまえ工房 (onamae-label) — 製品固有デザインシステム
+ * 世界観「シール台紙」: アプリ自体が、クラフト台紙に並んだ剥がせるお名前シール。
+ * 型抜きセル・破線のカットガイド・剥がれた角・マスキングテープの留め。
+ * 共有テンプレは使わず、この製品専用にゼロから構築。
+ * ------------------------------------------------------------------ */
+
+/* ---- 機能リセット（scaffold 由来の a11y ベースライン） ---- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+* {
+  margin: 0;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+}
+img,
+svg,
+canvas {
+  max-width: 100%;
+  height: auto;
+}
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* ---- パレット（クラフト台紙＋お名前ペンの朱いちご） ----
+ * 朱いちご ink は色相 352（台帳の空き帯 340-360）。青224/朱赤12/橙18/緑125/
+ * 菫288/マゼンタ330/藍228/黄42/ティール185 いずれとも家族的に重ならない。 */
+:root {
+  --paper: #f5ecdb; /* クラフト台紙のベース地 */
+  --paper-2: #efe3cd; /* 一段沈んだ地（レール等） */
+  --card: #fbf7ee; /* シール白（型抜きセルの面） */
+  --ink: #2f2a24; /* 墨に寄せた文字色 */
+  --ink-soft: #6a6055; /* 補助テキスト */
+  --line: #d8c8ab; /* 罫・破線カットガイド */
+  --line-strong: #b9a483;
+  --accent: #d6284b; /* 朱いちご（お名前ペン） hue352 */
+  --accent-ink: #b21f3d; /* 濃い朱いちご（本文コントラスト用） */
+  /* 塗り(--accent-solid)＋その上の文字(--accent-on)。白文字はlightのみAA。 */
+  --accent-solid: #d6284b; /* 塗り。#fff と 4.9:1 */
+  --accent-on: #ffffff; /* 塗りの上の文字 */
+  --accent-wash-2: #fbe4e7; /* 朱いちごの淡いテープ地 */
+  --tape: #cfe8e2; /* マスキングテープ（薄荷） */
+  --tape-ink: #2b6a5e;
+  --shadow: 210 30% 20%;
+  --focus: #b21f3d;
+  --font-ui:
+    "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Meiryo",
+    system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* 名前見本は「お名前ペンで書いた」風に、UIと同じ骨格を太く詰めて墨にじみを添える
+   * （丸ゴシックは他製品の署名なので display 書体としては使わない）。 */
+  --font-name: var(--font-ui);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #201c18; /* 夜の食卓で準備する暗いクラフト地 */
+    --paper-2: #2a251f;
+    --card: #322c25; /* 暗所のシール面 */
+    --ink: #f2ebdd;
+    --ink-soft: #b7ac9a;
+    --line: #4a4136;
+    --line-strong: #6a5e4d;
+    --accent: #ff6d84; /* 暗地でAAを満たすよう明るい朱いちご */
+    --accent-ink: #ff8a9c;
+    /* 暗地では塗りを明るく保ち、その上の文字を濃色へ反転して AA を満たす。 */
+    --accent-solid: #ff6d84;
+    --accent-on: #2a0f16; /* 明るい塗りの上の濃い文字。6.4:1 */
+    --accent-wash-2: #3a2a2c;
+    --tape: #2f4a45;
+    --tape-ink: #b7e6dc;
+    --focus: #ff8a9c;
+  }
+}
+/* 明示トグル（コンソール撮影の dark 指定に対応） */
+:root[data-theme="dark"] {
+  --paper: #201c18;
+  --paper-2: #2a251f;
+  --card: #322c25;
+  --ink: #f2ebdd;
+  --ink-soft: #b7ac9a;
+  --line: #4a4136;
+  --line-strong: #6a5e4d;
+  --accent: #ff6d84;
+  --accent-ink: #ff8a9c;
+  --accent-solid: #ff6d84;
+  --accent-on: #2a0f16;
+  --accent-wash-2: #3a2a2c;
+  --tape: #2f4a45;
+  --tape-ink: #b7e6dc;
+  --focus: #ff8a9c;
+}
+
+html,
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 台紙の紙目（極薄いドット） */
+body {
+  background-image: radial-gradient(var(--line) 0.5px, transparent 0.6px);
+  background-size: 22px 22px;
+}
+
+:focus-visible {
+  outline: 2.5px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+a {
+  color: var(--accent-ink);
+}
+@media (prefers-color-scheme: dark) {
+  a {
+    color: var(--accent-ink);
+  }
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--accent-solid);
+  color: var(--accent-on);
+  padding: 0.6rem 1rem;
+  border-radius: 0 0 8px 0;
+  z-index: 50;
+}
+.skip:focus {
+  left: 0;
+}
+
+/* ------------------------------------------------------------------
+ * レイアウト原型: 中央の「台紙シート」を主役に、左に「持ち物の短冊」入力レール。
+ * masthead+カード羅列でも、コンソール縦一列でも、製図board でもない。
+ * ------------------------------------------------------------------ */
+.wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(1rem, 3vw, 2.4rem) clamp(1rem, 3vw, 2rem) 4rem;
+}
+
+.masthead {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.4rem;
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 800;
+  font-size: 1.35rem;
+  letter-spacing: 0.02em;
+}
+/* ブランドマーク: 剥がれかけのシール角 */
+.brand-mark {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--card);
+  border: 2px solid var(--accent);
+  position: relative;
+  flex: 0 0 auto;
+  box-shadow: 1.5px 2px 0 var(--line-strong);
+}
+.brand-mark::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 13px;
+  height: 13px;
+  background: var(--paper);
+  border-left: 2px solid var(--accent);
+  border-top: 2px solid var(--accent);
+  border-radius: 6px 0 0 0;
+  transform: rotate(-6deg);
+}
+.tagline {
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  flex: 1 1 240px;
+  min-width: 200px;
+}
+.freeze-note {
+  font-size: 0.8rem;
+  color: var(--tape-ink);
+  background: var(--tape);
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.lede {
+  margin: 0.8rem 0 1.6rem;
+  max-width: 60ch;
+  color: var(--ink-soft);
+}
+.lede strong {
+  color: var(--ink);
+}
+
+.studio {
+  display: grid;
+  grid-template-columns: minmax(300px, 380px) 1fr;
+  gap: clamp(1rem, 2.4vw, 1.8rem);
+  align-items: start;
+}
+@media (max-width: 860px) {
+  .studio {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---- 入力レール（短冊） ---- */
+.rail {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: sticky;
+  top: 1rem;
+}
+@media (max-width: 860px) {
+  .rail {
+    position: static;
+  }
+}
+
+.slip {
+  background: var(--card);
+  border: 1.5px solid var(--line-strong);
+  border-radius: 10px;
+  padding: 1rem 1rem 1.1rem;
+  position: relative;
+  box-shadow: 2px 3px 0 var(--line);
+}
+/* 短冊をとめるマスキングテープ */
+.slip::before {
+  content: "";
+  position: absolute;
+  top: -9px;
+  left: 22px;
+  width: 66px;
+  height: 18px;
+  background: var(--tape);
+  opacity: 0.92;
+  transform: rotate(-3deg);
+  border-radius: 2px;
+  box-shadow: 0 1px 2px hsl(var(--shadow) / 0.15);
+}
+.slip h2 {
+  font-size: 1.02rem;
+  margin-bottom: 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.slip h2 .num {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent-solid);
+  color: var(--accent-on);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.field {
+  display: block;
+  margin-bottom: 0.75rem;
+}
+.field:last-child {
+  margin-bottom: 0;
+}
+.field > .label {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  margin-bottom: 0.28rem;
+  font-weight: 700;
+}
+.input,
+.select {
+  width: 100%;
+  background: var(--paper);
+  border: 1.5px solid var(--line-strong);
+  border-radius: 8px;
+  padding: 0.55rem 0.65rem;
+  min-height: 44px; /* タッチターゲット 44px（スマホの保護者が主対象） */
+  color: var(--ink);
+}
+.input::placeholder {
+  color: var(--ink-soft);
+  opacity: 0.7;
+}
+.input:focus-visible,
+.select:focus-visible {
+  border-color: var(--accent);
+}
+
+/* 持ち物行 */
+.items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.item-row {
+  display: grid;
+  grid-template-columns: 1fr 64px 44px;
+  gap: 0.4rem;
+  align-items: center;
+}
+.item-row .count {
+  text-align: center;
+}
+.icon-btn {
+  border: 1.5px solid var(--line-strong);
+  background: var(--paper);
+  color: var(--ink-soft);
+  border-radius: 8px;
+  height: 100%;
+  min-height: 44px;
+  cursor: pointer;
+  font-weight: 800;
+}
+.icon-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.add-item {
+  margin-top: 0.6rem;
+  width: 100%;
+  border: 1.5px dashed var(--line-strong);
+  background: transparent;
+  color: var(--ink-soft);
+  border-radius: 8px;
+  padding: 0.5rem;
+  min-height: 44px;
+  cursor: pointer;
+  font-weight: 700;
+}
+.add-item:hover {
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* freeform の列×行ミニ入力 */
+.free-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+/* ---- 実寸カードでシート選択 ---- */
+.sheet-picker {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+.sheet-opt {
+  text-align: left;
+  border: 1.5px solid var(--line-strong);
+  background: var(--paper);
+  border-radius: 9px;
+  padding: 0.55rem 0.6rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+}
+.sheet-opt:hover {
+  border-color: var(--accent);
+}
+.sheet-opt[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent-wash-2);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.sheet-opt .mini {
+  height: 30px;
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
+  display: grid;
+  gap: 1px;
+  padding: 2px;
+  background: var(--card);
+}
+.sheet-opt .mini i {
+  background: var(--line);
+  border-radius: 1px;
+}
+.sheet-opt .t {
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.sheet-opt .d {
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}
+
+/* 微調整（オフセット） */
+.nudge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+}
+.nudge input {
+  width: 58px;
+  text-align: center;
+}
+
+/* ------------------------------------------------------------------
+ * 主役: 台紙シートのプレビュー（mm 実寸をスケール表示）
+ * ------------------------------------------------------------------ */
+.stage {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  min-width: 0;
+}
+.stage-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+.stage-bar .meta {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+.stage-bar .meta b {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.spacer {
+  flex: 1;
+}
+.warn {
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+
+.btn {
+  border: none;
+  border-radius: 9px;
+  padding: 0.6rem 1.05rem;
+  min-height: 44px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+}
+.btn-primary {
+  background: var(--accent-solid);
+  color: var(--accent-on);
+  box-shadow: 2px 3px 0 var(--accent-ink);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+}
+.btn-primary:active {
+  transform: translateY(1px);
+  box-shadow: 1px 1px 0 var(--accent-ink);
+}
+.btn-ghost {
+  background: var(--card);
+  color: var(--ink);
+  border: 1.5px solid var(--line-strong);
+}
+.btn-ghost:hover {
+  border-color: var(--accent);
+}
+
+.paper-stage {
+  background: var(--paper-2);
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  padding: clamp(0.6rem, 2vw, 1.4rem);
+  overflow: auto;
+  display: grid;
+  place-items: center;
+}
+.sheet-scaler {
+  transform-origin: top center;
+}
+
+/* 実寸シート（mm）。画面では transform で縮小。 */
+.sheet {
+  position: relative;
+  background: var(--card);
+  box-shadow: 3px 5px 14px hsl(var(--shadow) / 0.2);
+  /* カットガイドの破線を全体に薄く */
+}
+.cell {
+  position: absolute;
+  border: 0.3mm dashed var(--line-strong);
+  border-radius: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  padding: 0.6mm 1mm;
+  color: var(--ink);
+}
+.cell .fg {
+  color: var(--ink-soft);
+  line-height: 1.05;
+}
+.cell .owner {
+  font-family: var(--font-name);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  line-height: 1.05;
+  color: var(--ink);
+  /* お名前ペンのにじみを極薄く */
+  text-shadow: 0.12mm 0.12mm 0 var(--line);
+}
+.cell .item {
+  color: var(--accent-ink);
+  font-weight: 700;
+  line-height: 1.05;
+}
+
+/* 剥がれた角（1枚目だけ・装飾） */
+.peel {
+  position: absolute;
+  width: 7mm;
+  height: 7mm;
+  right: -0.3mm;
+  top: -0.3mm;
+  background: linear-gradient(135deg, transparent 46%, var(--paper) 47%);
+  border-left: 0.3mm solid var(--line-strong);
+  border-bottom: 0.3mm solid var(--line-strong);
+  transform: rotate(0deg);
+  pointer-events: none;
+}
+
+/* 空状態 */
+.empty-hint {
+  color: var(--ink-soft);
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+/* ---- 準備チェックリスト ---- */
+.checklist {
+  margin-top: 1.6rem;
+  background: var(--card);
+  border: 1.5px solid var(--line-strong);
+  border-radius: 10px;
+  padding: 1rem 1.1rem 1.2rem;
+}
+.checklist h2 {
+  font-size: 1.02rem;
+  margin-bottom: 0.6rem;
+}
+.checklist ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.checklist li {
+  display: flex;
+  gap: 0.55rem;
+  align-items: flex-start;
+  font-size: 0.92rem;
+}
+.checklist li::before {
+  content: "✓";
+  color: var(--accent);
+  font-weight: 900;
+  flex: 0 0 auto;
+}
+
+footer.foot {
+  margin-top: 2.4rem;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  border-top: 1.5px dashed var(--line-strong);
+  padding-top: 1rem;
+}
+
+/* ------------------------------------------------------------------
+ * 印刷: プレビューのシートだけを実寸で出す。
+ * ------------------------------------------------------------------ */
+@media print {
+  @page {
+    margin: 0;
+  }
+  body {
+    background: #fff !important;
+    background-image: none !important;
+  }
+  body * {
+    visibility: hidden !important;
+  }
+  #print-area,
+  #print-area * {
+    visibility: visible !important;
+  }
+  #print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+  /* 画面ではコンテナ幅に合わせて縮小しているが、印刷は実寸(mm)で出す。
+   * scale は .sheet-transform のインライン style に乗っているので等倍へ戻し、
+   * 縮小サイズに固定していた .print-sheet の箱も解除して用紙が切れないようにする。 */
+  .sheet-transform {
+    transform: none !important;
+  }
+  .print-sheet {
+    width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+  .sheet {
+    box-shadow: none !important;
+    background: #fff !important; /* dark 配色でも印刷は白地（インク節約・可読性） */
+  }
+  .cell {
+    color: #000 !important;
+    border-color: #bbb !important;
+  }
+  .cell .owner {
+    color: #000 !important;
+    text-shadow: none !important;
+  }
+  .cell .item {
+    color: #000 !important;
+  }
+  .cell .fg {
+    color: #333 !important;
+  }
+  .peel {
+    display: none !important;
+  }
+  .page-break {
+    page-break-after: always;
+  }
+}

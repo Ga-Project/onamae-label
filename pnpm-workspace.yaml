@@ -1,0 +1,12 @@
+# onamae-label — pnpm 設定。
+# pnpm 11 は未許可の依存ビルドスクリプトを ERR_PNPM_IGNORED_BUILDS で hard-fail させる。
+# このリポジトリ単体で install / build が通るよう、実行を許可するネイティブビルドを
+# ここで明示する(許可は必要最小限にとどめる = 供給網の最小許可)。
+#
+#   unrs-resolver: eslint-config-next が使うリゾルバ(ネイティブ binding)。
+#                  `next lint` / install の build script に必要。
+#   sharp: Next の画像最適化用ネイティブ依存。本製品は static export ＋
+#          images.unoptimized=true で画像最適化サーバを使わないため、ビルド不要(false)。
+allowBuilds:
+  sharp: false
+  unrs-resolver: true
