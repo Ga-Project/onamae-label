@@ -6,6 +6,10 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  # PR でも検査だけは走らせる。push だけを契機にすると、マージするまで一度も
+  # CI が動かず「マージ前に緑を確認する」ができない（deploy は下で push に限定）。
+  pull_request:
+    branches: [main]
 
 # 最小権限。書き込みが要るのは deploy job のみ（下で job 単位に付与）。
 permissions:
@@ -92,6 +96,8 @@ jobs:
   deploy:
     name: Deploy
     needs: build
+    # 公開は main への push のときだけ。PR では検査までで止める。
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
       contents: read
