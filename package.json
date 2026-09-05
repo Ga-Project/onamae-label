@@ -3,12 +3,17 @@
   "version": "0.0.0",
   "private": true,
   "packageManager": "pnpm@11.8.0",
+  "engines": {
+    "//": "テストは .ts を直接 import しており Node の型ストリップに依存する。既定で有効になったのは 22.18.0 以降で、それ未満では ERR_UNKNOWN_FILE_EXTENSION で落ちる。",
+    "node": ">=22.18.0"
+  },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/check-base-path.mjs && next build",
     "lint": "next lint --max-warnings 0",
     "typecheck": "tsc --noEmit",
-    "test": "node --test"
+    "test": "node --test",
+    "verify:out": "node scripts/verify-out.mjs"
   },
   "dependencies": {
     "next": "^15.5.21",

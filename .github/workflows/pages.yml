@@ -1,7 +1,7 @@
 name: Deploy to GitHub Pages
 
-# 秘密スキャン → ビルド → Pages 公開を1つの workflow で直列化する。
-# スキャンが落ちたら build は skip され、Pages には何も公開されない。
+# 秘密スキャン → テスト → ビルド → Pages 公開を1つの workflow で直列化する。
+# 前段が落ちたら build は skip され、Pages には何も公開されない。
 
 on:
   push:
@@ -38,22 +38,53 @@ jobs:
       - name: Scan full history
         run: gitleaks detect --no-banner --redact
 
-  build:
-    name: Build (static export)
-    needs: secret-scan # スキャン通過が前提。fail 時は skip され公開されない。
+  # ---------------------------------------------------------------------------
+  # 面付けエンジン・シート規格・配信 URL 組み立ての単体テストと、型・lint を
+  # build より前に見る。落ちる時は早く落とす。build はこの job も needs にする
+  # ため、赤ければ公開に進まない。
+  # ---------------------------------------------------------------------------
+  test:
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          # 下限は .nvmrc で一元管理する（テストが Node の TS 型ストリップに依存し、
+          # 既定で有効なのは 22.18.0 以降。`node-version: 22` だと下限が表明されない）。
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+      - run: pnpm typecheck
+      - run: pnpm lint
+
+  build:
+    name: Build (static export)
+    needs: [secret-scan, test] # 前段の通過が前提。fail 時は skip され公開されない。
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          # 下限は .nvmrc で一元管理する（テストが Node の TS 型ストリップに依存し、
+          # 既定で有効なのは 22.18.0 以降。`node-version: 22` だと下限が表明されない）。
+          node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       # プロジェクトページ（<owner>.github.io/onamae-label/）へサブパス配信するため basePath を注入。
       - run: pnpm build
         env:
           NEXT_PUBLIC_BASE_PATH: /onamae-label
+      # 書き出した out/ そのものを検査する。純関数のテストは「配線が切れた」ことを
+      # 検出できない（layout が siteUrl を呼ばなくなっても緑のまま通る）ので、
+      # 公開される成果物に対して不変条件を突き合わせる。
+      # env は渡さない。verify:out の期待値は package.json の name から導くのが
+      # 不変条件で、env を並べると「検査は env で駆動される」という誤解が
+      # ワークフローの見た目の上で復活する（それは今回取り除いた不具合そのもの）。
+      - run: pnpm verify:out
       - uses: actions/upload-pages-artifact@v3
         with:
           path: out

@@ -5,6 +5,7 @@
 // → env NEXT_PUBLIC_BASE_PATH で切替。既定（未設定）は空＝ルート配信。Pages デプロイ時のみ注入。
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
+
 const nextConfig = {
   reactStrictMode: true,
   // static export（out/ に静的書き出し）。サーバランタイム不要。

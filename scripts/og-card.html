@@ -1,0 +1,237 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>おなまえ工房 — OGP カード（1200x630）</title>
+<!--
+  おなまえ工房 — SNS リンクプレビュー用カードの版下。
+
+  絵にしているのは「出力された名前シール」ではなく **面付けという行為そのもの**。
+  カード全面がラベルシートの版面で、四隅のトンボと mm の寸法線が主役になる。
+  出力物（名前シールの束）だけを描くと競合の名前シール販売サイトと同じ絵になり、
+  この製品の差別化（規格に mm 単位で嵌める）が画に出ないため。
+  紙面を回転させて影で浮かせる構図は他製品の署名なので使わない（版面は正対）。
+
+  色は globals.css の light トークンと同値。純白は使わず、シール面は --card。
+
+  書き出し: ./scripts/og-card.sh （レイアウト検査 → 書き出し → 寸法/サイズ検査 → sha256）
+-->
+<style>
+  :root {
+    --paper: #f5ecdb;
+    --paper-2: #efe3cd;
+    --card: #fbf7ee;
+    --ink: #2f2a24;
+    --ink-soft: #6a6055;
+    --line: #d8c8ab;
+    --line-strong: #b9a483;
+    --accent: #d6284b;
+    --accent-ink: #b21f3d;
+    --tape: #cfe8e2;
+    --tape-ink: #2b6a5e;
+    --font-ui: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic",
+      "Meiryo", system-ui, sans-serif;
+  }
+  * { margin: 0; box-sizing: border-box; }
+  html, body { width: 1200px; height: 630px; }
+  body {
+    font-family: var(--font-ui);
+    color: var(--ink);
+    background-color: var(--paper);
+    /* 台紙の紙目。本体は 0.5px/22px だが、SNS では 300-500px まで縮小されて
+       表示され、その倍率では本体と同じ径のドットは完全に消える。地の質感を
+       残すために径と間隔を意図的に拡大している（本体との不一致は承知の上）。 */
+    background-image: radial-gradient(var(--line) 1px, transparent 1.2px);
+    background-size: 30px 30px;
+    overflow: hidden;
+  }
+
+  /* 版面。回転も影も持たない正対のプレート。 */
+  .plate {
+    position: relative;
+    width: 1200px;
+    height: 630px;
+    padding: 44px 62px 40px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ---- トンボ（四隅の見当合わせ） ---- */
+  .reg { position: absolute; width: 46px; height: 46px; }
+  .reg::before, .reg::after {
+    content: ""; position: absolute; background: var(--ink-soft);
+  }
+  .reg::before { width: 46px; height: 2px; top: 22px; }
+  .reg::after  { height: 46px; width: 2px; left: 22px; }
+  .reg.tl { top: 20px; left: 20px; }
+  .reg.tr { top: 20px; right: 20px; }
+  .reg.bl { bottom: 20px; left: 20px; }
+  .reg.br { bottom: 20px; right: 20px; }
+
+  /* ---- 版面の見出し（刷り込みとして紙面の中にある） ---- */
+  .head {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 26px; padding-left: 34px; padding-right: 34px;
+  }
+  h1 {
+    font-size: 72px; line-height: 1.05; font-weight: 800;
+    letter-spacing: 0.01em; white-space: nowrap;
+  }
+  h1 .pen { color: var(--accent-ink); }
+  .spec {
+    font-size: 28px; font-weight: 800; color: var(--tape-ink);
+    background: var(--tape); padding: 9px 20px; white-space: nowrap;
+    /* マスキングテープの毛羽立った端 */
+    clip-path: polygon(0 5%, 100% 0, 99.4% 95%, 0.6% 100%);
+  }
+  .lead {
+    margin-top: 14px; padding-left: 34px;
+    font-size: 30px; line-height: 1.5; font-weight: 700; white-space: nowrap;
+  }
+  .lead b { color: var(--accent-ink); font-weight: 800; }
+
+  /* ---- 面付け図（1枚ぶんの寸法を示すセル格子） ----
+   * 寸法線は **1セルに対して** 引く。格子全体に渡すと「2枚ぶんの幅が 64mm」と
+   * 読めてしまい、この製品の主張（規格1枚に mm 単位で嵌める）と食い違う。
+   * そのため格子は fr ではなく実寸で組み、寸法線の長さがセルと一致することを
+   * 幾何として保証する（og-card.sh のレイアウト検査でも突き合わせる）。 */
+  .impose {
+    position: relative;
+    margin-top: 20px;
+    margin-left: 34px;
+    width: 1008px;   /* 格子918 + 間隔16 + 寸法線74 */
+    height: 290px;   /* 格子232 + 間隔10 + 横寸法線48 */
+  }
+  .grid {
+    position: absolute; top: 0; left: 0;
+    width: 918px;
+    display: grid;
+    grid-template-columns: 450px 450px;
+    /* セルは実寸比のまま描く。64:33 = 1.9394 に対し 450:232 = 1.9397。
+       トンボと寸法線という製図の記号を借りる以上、描かれた矩形の比が
+       寸法記入と食い違っていてはならない（絵がこの製品の主張を裏切る）。 */
+    grid-auto-rows: 232px;
+    gap: 18px;
+  }
+  .cell {
+    background: var(--card);
+    border: 2px dashed var(--line-strong);
+    border-radius: 10px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 6px;
+  }
+  .furi { font-size: 30px; line-height: 1.15; color: var(--ink-soft); letter-spacing: 0.14em; }
+  .name { font-size: 56px; line-height: 1.2; font-weight: 800; letter-spacing: 0.01em; }
+  .item { font-size: 30px; line-height: 1.15; font-weight: 800; color: var(--accent-ink); }
+
+  /* 寸法線（引き出し線＋矢羽根＋寸法値）。この製品の主張そのもの。 */
+  .dim { position: absolute; color: var(--accent-ink); }
+  .dim .bar { position: absolute; background: var(--accent); }
+  .dim .cap { position: absolute; background: var(--accent); }
+  .dim .val {
+    position: absolute; font-size: 30px; line-height: 1; font-weight: 800;
+    background: var(--paper); padding: 0 12px; white-space: nowrap;
+  }
+  /* 横 64mm: 左下セル1枚ぶんの幅に合わせる（left/width がセルと一致） */
+  .dim-x { left: 0; width: 450px; top: 242px; height: 48px; }
+  .dim-x .bar { left: 0; right: 0; top: 23px; height: 2px; }
+  /* 引き出し線。セルの辺から寸法線まで実際に伸ばす（近接だけで示さない）。 */
+  .dim-x .cap { top: -10px; width: 2px; height: 44px; }
+  .dim-x .cap.s { left: 0; } .dim-x .cap.e { right: 0; }
+  .dim-x .val { top: 9px; left: 50%; transform: translateX(-50%); }
+  /* 縦 33mm: 右上セル1枚ぶんの高さに合わせる（top/height がセルと一致） */
+  .dim-y { left: 934px; top: 0; width: 74px; height: 232px; }
+  .dim-y .bar { top: 0; bottom: 0; left: 19px; width: 2px; }
+  .dim-y .cap { left: -16px; width: 42px; height: 2px; }
+  .dim-y .cap.s { top: 0; } .dim-y .cap.e { bottom: 0; }
+  /* 寸法値は寸法線の**横**に置く。線の上に重ねると、値の背景が線そのものを
+     隠してしまい「寸法を測っている」という絵が成立しない。 */
+  /* 縦の寸法値は右から読む＝下から上（JIS B 0001 / ISO 129）。 */
+  .dim-y .val { top: 50%; left: 52px; transform: translate(-50%, -50%) rotate(-90deg); padding: 0; }
+
+  /* ---- 版面の刷り込み（下段） ---- */
+  .foot {
+    margin-top: 14px; padding-left: 34px;
+    font-size: 28px; font-weight: 800; color: var(--ink-soft);
+    display: flex; gap: 26px; white-space: nowrap;
+  }
+  .foot span { position: relative; }
+  .foot span + span::before {
+    content: ""; position: absolute; left: -14px; top: 50%;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--line-strong); transform: translateY(-50%);
+  }
+</style>
+
+<div class="plate">
+  <i class="reg tl"></i><i class="reg tr"></i><i class="reg bl"></i><i class="reg br"></i>
+
+  <div class="head">
+    <h1>おなまえ<span class="pen">工房</span></h1>
+    <span class="spec">24面 なまえシール</span>
+  </div>
+  <p class="lead">名前を入れるだけで、手持ちのシートに<b>mm単位で面付け</b>。</p>
+
+  <div class="impose">
+    <div class="grid">
+      <div class="cell"><span class="furi">ヤマダ ハナコ</span><span class="name">やまだ はなこ</span><span class="item">えんぴつ</span></div>
+      <div class="cell"><span class="furi">ヤマダ ハナコ</span><span class="name">やまだ はなこ</span><span class="item">したじき</span></div>
+    </div>
+    <div class="dim dim-y"><i class="bar"></i><i class="cap s"></i><i class="cap e"></i><span class="val">33mm</span></div>
+    <div class="dim dim-x"><i class="bar"></i><i class="cap s"></i><i class="cap e"></i><span class="val">64mm</span></div>
+  </div>
+
+  <p class="foot"><span>無料</span><span>登録不要</span><span>入力は端末内で処理</span></p>
+</div>
+
+<script>
+  // レイアウト検査。og-card.sh が --dump-dom で読み、壊れていれば書き出しを失敗させる。
+  // 目視は同種の破綻を実際に取りこぼしたので、機械で判定できるものは機械で落とす。
+  // 結果は hidden 要素にだけ書くので、書き出す画像は変わらない。
+  window.addEventListener("load", function () {
+    var bad = [];
+
+    // 1. はみ出し（内容が容器に収まっていない）
+    document.querySelectorAll(".plate *").forEach(function (el) {
+      if (el.clientWidth > 0 && el.scrollWidth > el.clientWidth + 1) {
+        bad.push("横はみ出し " + (el.className || el.tagName));
+      }
+      if (el.clientHeight > 0 && el.scrollHeight > el.clientHeight + 1) {
+        bad.push("縦はみ出し " + (el.className || el.tagName));
+      }
+    });
+
+    // 2. 版面からの逸脱（1200x630 の外に出ている要素）
+    document.querySelectorAll(".plate > *, .cell, .dim, .dim .val").forEach(function (el) {
+      var r = el.getBoundingClientRect();
+      if (r.left < -1 || r.top < -1 || r.right > 1201 || r.bottom > 631) {
+        bad.push("枠外 " + (el.className || el.tagName));
+      }
+    });
+
+    // 3. 文字サイズの下限（SNS では 300-500px まで縮小される。小さい文字は
+    //    そこで完全に読めなくなり、何のツールかが伝わらない）
+    document.querySelectorAll(".plate *").forEach(function (el) {
+      if (!el.textContent || !el.textContent.trim()) return;
+      if (el.children.length) return; // テキストを直接持つ末端だけ見る
+      var px = parseFloat(getComputedStyle(el).fontSize);
+      if (px < 28) bad.push("文字が小さい " + (el.className || el.tagName) + "(" + px + "px)");
+    });
+
+    // 4. 寸法線が1セルと一致しているか（格子全体に渡ると「2枚ぶんで64mm」に読める。
+    //    この製品の主張そのものなので、絵が嘘をつかないことを幾何で担保する）
+    var cell = document.querySelector(".cell");
+    var dx = document.querySelector(".dim-x");
+    var dy = document.querySelector(".dim-y");
+    if (cell && dx && Math.abs(cell.getBoundingClientRect().width - dx.getBoundingClientRect().width) > 1) {
+      bad.push("横寸法線がセル幅と不一致");
+    }
+    if (cell && dy && Math.abs(cell.getBoundingClientRect().height - dy.getBoundingClientRect().height) > 1) {
+      bad.push("縦寸法線がセル高と不一致");
+    }
+
+    var m = document.createElement("div");
+    m.id = "overflow-report";
+    m.hidden = true;
+    m.textContent = bad.length ? "LAYOUT_FAIL:" + bad.join(" / ") : "LAYOUT_OK";
+    document.body.appendChild(m);
+  });
+</script>
