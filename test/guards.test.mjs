@@ -140,6 +140,10 @@ test("枠線の切替: 設定が guides-off クラスに届き、画面は点線
   assert.match(page, /guides=\{guides\}/);
   assert.match(page, /checked=\{guides\}/);
   const css = readFileSync(join(ROOT, "app/globals.css"), "utf8");
-  assert.match(css, /\.sheet\.guides-off \.cell\s*\{[^}]*border-style:\s*dotted/);
+  assert.match(css, /\.sheet\.guides-off \.cell\s*\{[^}]*outline:[^;]*dotted/);
   assert.match(css, /@media print\s*\{\s*\.sheet\.guides-off \.cell\s*\{[^}]*border-style:\s*none\s*!important/);
+  // 画面と印刷でセルの内寸を変えない: guides-off は border の幅で目安を描かない
+  const rule = css.match(/\.sheet\.guides-off \.cell\s*\{[^}]*\}/)[0];
+  assert.doesNotMatch(rule, /border-width/);
+  assert.match(page, /"--guide-w"/);
 });

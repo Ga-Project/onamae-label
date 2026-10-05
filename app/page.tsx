@@ -438,7 +438,7 @@ export default function Home() {
                           style={{
                             transform: `scale(${scale})`,
                             transformOrigin: "top left",
-                            ["--guide-w" as string]: `${(1.5 / scale).toFixed(2)}px`,
+                            ["--guide-w" as string]: `${(1.5 / Math.max(scale, 0.1)).toFixed(2)}px`,
                           }}
                         >
                           <SheetView

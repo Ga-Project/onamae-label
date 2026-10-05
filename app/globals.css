@@ -351,7 +351,7 @@ a {
 .add-item {
   margin-top: 0.6rem;
   width: 100%;
-  border: 1.5px dashed var(--line-strong);
+  border: 1.5px dashed var(--control-line);
   background: transparent;
   color: var(--ink-soft);
   border-radius: 8px;
@@ -521,16 +521,17 @@ a {
   background: var(--card);
   box-shadow: 3px 5px 14px hsl(var(--shadow) / 0.2);
 }
-/* 枠線を印刷しない設定。画面では列・段の確認用に薄い点線だけ残し、印刷では描かない */
+/* 枠線を印刷しない設定。画面では列・段の確認用に点線の目安だけ残し、印刷では描かない */
 .sheet.guides-off .cell {
-  border-style: dotted;
-  border-color: var(--control-line);
-  /* スマホでは台紙ごと縮小されるので、縮小率を打ち消した太さで画面の目安を保つ */
-  border-width: var(--guide-w, 0.3mm);
+  /* 枠は描かず（印刷と同じ寸法）、画面だけ outline で点線の目安を出す。縮小率は打ち消す */
+  border-style: none;
+  outline: var(--guide-w, 0.3mm) dotted var(--control-line);
+  outline-offset: calc(-1 * var(--guide-w, 0.3mm));
 }
 @media print {
   .sheet.guides-off .cell {
     border-style: none !important;
+    outline: none !important;
   }
 }
 
