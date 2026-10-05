@@ -146,4 +146,8 @@ test("枠線の切替: 設定が guides-off クラスに届き、画面は点線
   const rule = css.match(/\.sheet\.guides-off \.cell\s*\{[^}]*\}/)[0];
   assert.doesNotMatch(rule, /border-width/);
   assert.match(page, /"--guide-w"/);
+  assert.match(rule, /border-style:\s*none/);
+  assert.match(rule, /outline-offset:\s*calc\(-1/);
+  assert.match(css, /@media print\s*\{\s*\.sheet\.guides-off \.cell\s*\{[^}]*outline:\s*none\s*!important/);
+  assert.match(page, /Math\.max\(scale,\s*0\.1\)/);
 });
