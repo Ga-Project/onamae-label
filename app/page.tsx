@@ -327,24 +327,17 @@ export default function Home() {
                 </div>
               )}
 
-              <label
-                className="check"
-                style={{
-                  display: "flex",
-                  gap: "0.5rem",
-                  alignItems: "center",
-                  marginTop: "0.8rem",
-                }}
-              >
+              <label className="check">
                 <input
                   type="checkbox"
+                  aria-describedby="guides-hint"
                   checked={guides}
                   onChange={(e) => setGuides(e.target.checked)}
                 />
                 <span>
                   ラベルの枠線（破線）も印刷する
-                  <span className="meta" style={{ display: "block" }}>
-                    市販のカット済みシールに刷るときは外すと、枠線がシールの外へはみ出しません。
+                  <span className="hint" id="guides-hint">
+                    カット済みのシールに刷るときは、チェックを外してください。枠線がシールの外にはみ出します。外してもプレビューには薄い目安が残ります。
                   </span>
                 </span>
               </label>
@@ -481,7 +474,9 @@ export default function Home() {
             <li>
               本番の前に普通紙で試し刷りして、ずれたら「位置の微調整」で合わせる
             </li>
-            <li>ラベルシートは印刷後、破線に沿ってはがして貼る</li>
+            <li>
+              ラベルシートは印刷後、はがして貼る（枠線を印刷した場合は破線に沿って）
+            </li>
           </ul>
         </section>
 
@@ -508,7 +503,7 @@ function SheetView({
 }) {
   return (
     <div
-      className="sheet"
+      className={guides ? "sheet" : "sheet guides-off"}
       style={{
         width: `${sheet.page.w}mm`,
         height: `${sheet.page.h}mm`,

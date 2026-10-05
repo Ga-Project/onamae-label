@@ -133,3 +133,12 @@ test("verify-out の期待値は env ではなく package.json の name から�
   assert.equal(ng.status, 1);
   assert.match(ng.stderr, /canonical/);
 });
+
+test("枠線の切替: 設定が画面のセルと印刷の枠線に配線されている", () => {
+  const page = readFileSync(join(ROOT, "app/page.tsx"), "utf8");
+  assert.match(page, /borderStyle:\s*guideBorderStyle\(guides\)/);
+  assert.match(page, /guides=\{guides\}/);
+  assert.match(page, /checked=\{guides\}/);
+  const css = readFileSync(join(ROOT, "app/globals.css"), "utf8");
+  assert.match(css, /\.sheet\.guides-off \.cell/);
+});

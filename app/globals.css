@@ -519,6 +519,67 @@ a {
   box-shadow: 3px 5px 14px hsl(var(--shadow) / 0.2);
   /* カットガイドの破線を全体に薄く */
 }
+/* 枠線を印刷しない設定。画面では列・段の確認用に薄い点線だけ残し、印刷では描かない */
+@media screen {
+  .sheet.guides-off .cell {
+    border: 0.3mm dotted var(--line);
+  }
+}
+
+/* 印刷設定のチェック（行全体を44px以上のヒット領域にする） */
+.check {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  min-height: 44px;
+  margin-top: 0.8rem;
+  padding: 0.35rem 0;
+  cursor: pointer;
+  border-radius: 8px;
+}
+.check > span {
+  min-width: 0;
+}
+.check input {
+  appearance: none;
+  flex: 0 0 auto;
+  width: 1.4rem;
+  height: 1.4rem;
+  margin: 0.1rem 0 0;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 5px;
+  background: var(--paper);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.check input:checked {
+  background: var(--accent-solid);
+  border-color: var(--accent-solid);
+}
+.check input:checked::after {
+  content: "";
+  width: 0.75rem;
+  height: 0.4rem;
+  border-left: 2.5px solid var(--accent-on);
+  border-bottom: 2.5px solid var(--accent-on);
+  transform: translateY(-1px) rotate(-45deg);
+}
+.check:has(input:focus-visible) {
+  outline: 2.5px solid var(--focus);
+  outline-offset: 2px;
+}
+.check input:focus-visible {
+  outline: none;
+}
+.check .hint {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
 .cell {
   position: absolute;
   border: 0.3mm dashed var(--line-strong);
