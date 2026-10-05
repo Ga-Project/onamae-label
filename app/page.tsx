@@ -15,6 +15,7 @@ import {
   imposeSheet,
   cellsPerSheet,
   sheetsNeeded,
+  guideBorderStyle,
   type Item,
   type PlacedCell,
 } from "./lib/imposition";
@@ -68,6 +69,7 @@ export default function Home() {
   const [freeRows, setFreeRows] = useState(13);
   const [offsetX, setOffsetX] = useState(0);
   const [offsetY, setOffsetY] = useState(0);
+  const [guides, setGuides] = useState(true);
 
   const baseSheet = sheetById(sheetId);
   const sheet: LabelSheet = useMemo(
@@ -325,6 +327,28 @@ export default function Home() {
                 </div>
               )}
 
+              <label
+                className="check"
+                style={{
+                  display: "flex",
+                  gap: "0.5rem",
+                  alignItems: "center",
+                  marginTop: "0.8rem",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={guides}
+                  onChange={(e) => setGuides(e.target.checked)}
+                />
+                <span>
+                  ラベルの枠線（破線）も印刷する
+                  <span className="meta" style={{ display: "block" }}>
+                    市販のカット済みシールに刷るときは外すと、枠線がシールの外へはみ出しません。
+                  </span>
+                </span>
+              </label>
+
               <div style={{ marginTop: "0.8rem" }}>
                 <span className="label" style={{ fontWeight: 700 }}>
                   位置の微調整（試し刷りがずれる時）
@@ -427,6 +451,7 @@ export default function Home() {
                             sheet={sheet}
                             cells={cells}
                             showPeel={i === 0}
+                            guides={guides}
                           />
                         </div>
                       </div>
@@ -474,10 +499,12 @@ function SheetView({
   sheet,
   cells,
   showPeel,
+  guides,
 }: {
   sheet: LabelSheet;
   cells: PlacedCell[];
   showPeel: boolean;
+  guides: boolean;
 }) {
   return (
     <div
@@ -498,6 +525,7 @@ function SheetView({
             width: `${c.w}mm`,
             height: `${c.h}mm`,
             borderRadius: `${c.radius}mm`,
+            borderStyle: guideBorderStyle(guides),
           }}
         >
           {c.content.furigana && (

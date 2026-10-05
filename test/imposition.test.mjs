@@ -9,6 +9,7 @@ import {
   sheetsNeeded,
   fitFontSize,
   textWidthUnits,
+  guideBorderStyle,
 } from "../app/lib/imposition.ts";
 import {
   SHEETS,
@@ -153,4 +154,9 @@ test("SHEETS: 全規格でグリッドが用紙内に物理的に収まる", () 
     assert.ok(totalW <= s.page.w + 1e-6, `${s.id} 横が用紙内`);
     assert.ok(totalH <= s.page.h + 1e-6, `${s.id} 縦が用紙内`);
   }
+});
+
+test("guideBorderStyle: 枠線ありは破線、なしは描かない", () => {
+  assert.equal(guideBorderStyle(true), "dashed");
+  assert.equal(guideBorderStyle(false), "none");
 });
