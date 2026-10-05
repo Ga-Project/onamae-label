@@ -337,7 +337,7 @@ export default function Home() {
                 <span>
                   <span id="guides-label">ラベルの枠線（破線）も印刷する</span>
                   <span className="hint" id="guides-hint">
-                    カット済みのシールに刷るときは、チェックを外してください。外さないと枠線がシールの外にはみ出します。外してもプレビューには薄い点線が残ります。
+                    カット済みのシールに刷るときは、チェックを外してください。外さないと枠線がシールの外にはみ出します。外しても、画面のプレビューには点線の目安が残ります（印刷には出ません）。
                   </span>
                 </span>
               </label>
@@ -438,6 +438,7 @@ export default function Home() {
                           style={{
                             transform: `scale(${scale})`,
                             transformOrigin: "top left",
+                            ["--guide-w" as string]: `${(1.5 / scale).toFixed(2)}px`,
                           }}
                         >
                           <SheetView

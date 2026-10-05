@@ -42,6 +42,7 @@ select {
   --ink-soft: #6a6055; /* 補助テキスト */
   --line: #d8c8ab; /* 罫・破線カットガイド */
   --line-strong: #b9a483;
+  --control-line: #8a7c68; /* 操作部品の枠。非テキスト3:1以上（紙地 3.5:1） */
   --accent: #d6284b; /* 朱いちご（お名前ペン） hue348 */
   --accent-ink: #b21f3d; /* 濃い朱いちご（本文コントラスト用） */
   /* 塗り(--accent-solid)＋その上の文字(--accent-on)。白文字はlightのみAA。 */
@@ -69,6 +70,7 @@ select {
     --ink-soft: #b7ac9a;
     --line: #4a4136;
     --line-strong: #6a5e4d;
+    --control-line: #8c8070; /* 暗い紙地 4.4:1 */
     --accent: #ff6d84; /* 暗地でAAを満たすよう明るい朱いちご */
     --accent-ink: #ff8a9c;
     /* 暗地では塗りを明るく保ち、その上の文字を濃色へ反転して AA を満たす。 */
@@ -89,6 +91,7 @@ select {
   --ink-soft: #b7ac9a;
   --line: #4a4136;
   --line-strong: #6a5e4d;
+  --control-line: #8c8070;
   --accent: #ff6d84;
   --accent-ink: #ff8a9c;
   --accent-solid: #ff6d84;
@@ -301,7 +304,7 @@ a {
 .select {
   width: 100%;
   background: var(--paper);
-  border: 1.5px solid var(--ink-soft);
+  border: 1.5px solid var(--control-line);
   border-radius: 8px;
   padding: 0.55rem 0.65rem;
   min-height: 44px; /* タッチターゲット 44px（スマホの保護者が主対象） */
@@ -332,7 +335,7 @@ a {
   text-align: center;
 }
 .icon-btn {
-  border: 1.5px solid var(--ink-soft);
+  border: 1.5px solid var(--control-line);
   background: var(--paper);
   color: var(--ink-soft);
   border-radius: 8px;
@@ -377,7 +380,7 @@ a {
 }
 .sheet-opt {
   text-align: left;
-  border: 1.5px solid var(--ink-soft);
+  border: 1.5px solid var(--control-line);
   background: var(--paper);
   border-radius: 9px;
   padding: 0.55rem 0.6rem;
@@ -493,7 +496,7 @@ a {
 .btn-ghost {
   background: var(--card);
   color: var(--ink);
-  border: 1.5px solid var(--ink-soft);
+  border: 1.5px solid var(--control-line);
 }
 .btn-ghost:hover {
   border-color: var(--accent);
@@ -517,12 +520,13 @@ a {
   position: relative;
   background: var(--card);
   box-shadow: 3px 5px 14px hsl(var(--shadow) / 0.2);
-  /* カットガイドの破線を全体に薄く */
 }
 /* 枠線を印刷しない設定。画面では列・段の確認用に薄い点線だけ残し、印刷では描かない */
 .sheet.guides-off .cell {
   border-style: dotted;
-  border-color: var(--line-strong);
+  border-color: var(--control-line);
+  /* スマホでは台紙ごと縮小されるので、縮小率を打ち消した太さで画面の目安を保つ */
+  border-width: var(--guide-w, 0.3mm);
 }
 @media print {
   .sheet.guides-off .cell {
@@ -550,7 +554,7 @@ a {
   width: 1.4rem;
   height: 1.4rem;
   margin: 0.1rem 0 0;
-  border: 1.5px solid var(--ink-soft);
+  border: 1.5px solid var(--control-line);
   border-radius: 5px;
   background: var(--paper);
   display: grid;
