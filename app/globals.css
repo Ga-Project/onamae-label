@@ -301,7 +301,7 @@ a {
 .select {
   width: 100%;
   background: var(--paper);
-  border: 1.5px solid var(--line-strong);
+  border: 1.5px solid var(--ink-soft);
   border-radius: 8px;
   padding: 0.55rem 0.65rem;
   min-height: 44px; /* タッチターゲット 44px（スマホの保護者が主対象） */
@@ -332,7 +332,7 @@ a {
   text-align: center;
 }
 .icon-btn {
-  border: 1.5px solid var(--line-strong);
+  border: 1.5px solid var(--ink-soft);
   background: var(--paper);
   color: var(--ink-soft);
   border-radius: 8px;
@@ -377,7 +377,7 @@ a {
 }
 .sheet-opt {
   text-align: left;
-  border: 1.5px solid var(--line-strong);
+  border: 1.5px solid var(--ink-soft);
   background: var(--paper);
   border-radius: 9px;
   padding: 0.55rem 0.6rem;
@@ -493,7 +493,7 @@ a {
 .btn-ghost {
   background: var(--card);
   color: var(--ink);
-  border: 1.5px solid var(--line-strong);
+  border: 1.5px solid var(--ink-soft);
 }
 .btn-ghost:hover {
   border-color: var(--accent);
@@ -520,9 +520,13 @@ a {
   /* カットガイドの破線を全体に薄く */
 }
 /* 枠線を印刷しない設定。画面では列・段の確認用に薄い点線だけ残し、印刷では描かない */
-@media screen {
+.sheet.guides-off .cell {
+  border-style: dotted;
+  border-color: var(--line-strong);
+}
+@media print {
   .sheet.guides-off .cell {
-    border: 0.3mm dotted var(--line);
+    border-style: none !important;
   }
 }
 
@@ -546,7 +550,7 @@ a {
   width: 1.4rem;
   height: 1.4rem;
   margin: 0.1rem 0 0;
-  border: 1.5px solid var(--line-strong);
+  border: 1.5px solid var(--ink-soft);
   border-radius: 5px;
   background: var(--paper);
   display: grid;
@@ -570,7 +574,18 @@ a {
   outline-offset: 2px;
 }
 .check input:focus-visible {
-  outline: none;
+  outline: 2.5px solid var(--focus);
+  outline-offset: 2px;
+}
+@supports selector(:has(*)) {
+  .check input:focus-visible {
+    outline: none;
+  }
+}
+@media (forced-colors: active) {
+  .check input:checked::after {
+    border-color: CanvasText;
+  }
 }
 .check .hint {
   display: block;

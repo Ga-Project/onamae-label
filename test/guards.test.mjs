@@ -134,11 +134,12 @@ test("verify-out の期待値は env ではなく package.json の name から�
   assert.match(ng.stderr, /canonical/);
 });
 
-test("枠線の切替: 設定が画面のセルと印刷の枠線に配線されている", () => {
+test("枠線の切替: 設定が guides-off クラスに届き、画面は点線・印刷は無線になる", () => {
   const page = readFileSync(join(ROOT, "app/page.tsx"), "utf8");
-  assert.match(page, /borderStyle:\s*guideBorderStyle\(guides\)/);
+  assert.match(page, /guides\s*\?\s*"sheet"\s*:\s*"sheet guides-off"/);
   assert.match(page, /guides=\{guides\}/);
   assert.match(page, /checked=\{guides\}/);
   const css = readFileSync(join(ROOT, "app/globals.css"), "utf8");
-  assert.match(css, /\.sheet\.guides-off \.cell/);
+  assert.match(css, /\.sheet\.guides-off \.cell\s*\{[^}]*border-style:\s*dotted/);
+  assert.match(css, /@media print\s*\{\s*\.sheet\.guides-off \.cell\s*\{[^}]*border-style:\s*none\s*!important/);
 });

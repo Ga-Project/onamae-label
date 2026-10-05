@@ -15,7 +15,6 @@ import {
   imposeSheet,
   cellsPerSheet,
   sheetsNeeded,
-  guideBorderStyle,
   type Item,
   type PlacedCell,
 } from "./lib/imposition";
@@ -330,14 +329,15 @@ export default function Home() {
               <label className="check">
                 <input
                   type="checkbox"
+                  aria-labelledby="guides-label"
                   aria-describedby="guides-hint"
                   checked={guides}
                   onChange={(e) => setGuides(e.target.checked)}
                 />
                 <span>
-                  ラベルの枠線（破線）も印刷する
+                  <span id="guides-label">ラベルの枠線（破線）も印刷する</span>
                   <span className="hint" id="guides-hint">
-                    カット済みのシールに刷るときは、チェックを外してください。枠線がシールの外にはみ出します。外してもプレビューには薄い目安が残ります。
+                    カット済みのシールに刷るときは、チェックを外してください。外さないと枠線がシールの外にはみ出します。外してもプレビューには薄い点線が残ります。
                   </span>
                 </span>
               </label>
@@ -520,7 +520,6 @@ function SheetView({
             width: `${c.w}mm`,
             height: `${c.h}mm`,
             borderRadius: `${c.radius}mm`,
-            borderStyle: guideBorderStyle(guides),
           }}
         >
           {c.content.furigana && (

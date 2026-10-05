@@ -197,11 +197,3 @@ export function sheetsNeeded(sheet: LabelSheet, queueLength: number): number {
 function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
-
-/**
- * ラベル枠線の線種。はがして貼る台紙（A4普通紙）では破線がカットの目安になるが、
- * 市販のカット済みシールに刷ると枠線がシールの外へはみ出すので、消せるようにしてある。
- */
-export function guideBorderStyle(guides: boolean): "dashed" | "none" {
-  return guides ? "dashed" : "none";
-}
